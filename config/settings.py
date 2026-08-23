@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "rest_framework",
 
     "apps.core",
+    "apps.accounts",
 
 ]
 
@@ -159,3 +160,4 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
 }
+AUTH_USER_MODEL = "accounts.User"
