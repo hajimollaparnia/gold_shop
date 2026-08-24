@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}
+    محصولات طلا
+{% endblock %}
+
+{% block content %}
+
+<section>
+    <div>
+        <h1>محصولات طلا</h1>
+
+        {% if category %}
+            <p>دسته‌بندی: {{ category.name }}</p>
+        {% endif %}
+
+        {% if products %}
+            <div>
+                {% for product in products %}
+                    <article>
+                        <h2>
+                            <a href="{% url 'catalog:product_detail' product.slug %}">
+                                {{ product.name }}
+                            </a>
+                        </h2>
+
+                        {% if product.brand %}
+                            <p>برند: {{ product.brand.name }}</p>
+                        {% endif %}
+
+                        {% if product.description %}
+                            <p>{{ product.description|truncatewords:20 }}</p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+
+            {% if is_paginated %}
+                <nav aria-label="صفحه‌بندی محصولات">
+
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}">
+                            قبلی
+                        </a>
+                    {% endif %}
+
+                    <span>
+                        صفحه {{ page_obj.number }} از {{ page_obj.paginator.num_pages }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">
+                            بعدی
+                        </a>
+                    {% endif %}
+
+                </nav>
+            {% endif %}
+
+        {% else %}
+            <p>در حال حاضر محصولی برای نمایش وجود ندارد.</p>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

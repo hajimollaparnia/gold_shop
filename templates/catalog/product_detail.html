@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ product.name }}
+{% endblock %}
+
+{% block content %}
+
+<article>
+
+    <header>
+        <h1>{{ product.name }}</h1>
+
+        {% if product.brand %}
+            <p>برند: {{ product.brand.name }}</p>
+        {% endif %}
+
+        {% if product.category %}
+            <p>
+                دسته‌بندی:
+                <a href="{% url 'catalog:category_product_list' product.category.slug %}">
+                    {{ product.category.name }}
+                </a>
+            </p>
+        {% endif %}
+    </header>
+
+    {% if product.description %}
+        <section>
+            <h2>توضیحات محصول</h2>
+            <p>{{ product.description }}</p>
+        </section>
+    {% endif %}
+
+    {% if product.variants.all %}
+        <section>
+            <h2>تنوع‌های محصول</h2>
+
+            <ul>
+                {% for variant in product.variants.all %}
+                    {% if variant.is_active %}
+                        <li>
+                            <strong>{{ variant.sku }}</strong>
+
+                            {% if variant.weight %}
+                                — {{ variant.weight }} گرم
+                            {% endif %}
+
+                            {% if variant.stock_quantity > 0 %}
+                                — موجود
+                            {% else %}
+                                — ناموجود
+                            {% endif %}
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+
+</article>
+
+{% endblock %}
