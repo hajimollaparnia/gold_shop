@@ -3,6 +3,7 @@ from django.db.models import F
 
 from apps.inventory.models import InventoryItem
 
+from apps.inventory.models import InventoryItem, StockMovement
 
 class ReservationService:
     """
@@ -103,18 +104,22 @@ class ReservationService:
         inventory_item.refresh_from_db()
 
         return inventory_item
-
     @staticmethod
     @transaction.atomic
     def commit(
         inventory_item_id: int,
         quantity: int,
+        reference: str = "",
+        note: str = "",
     ) -> InventoryItem:
         """
         Commit a reservation into a completed stock deduction.
 
         Both physical quantity and reserved quantity are decreased
         by the committed amount.
+
+        A corresponding outgoing StockMovement is created so the
+        completed reservation remains fully auditable.
 
         Raises:
             ValueError: If quantity is not positive or exceeds the
@@ -142,6 +147,14 @@ class ReservationService:
         ).update(
             quantity=F("quantity") - quantity,
             reserved_quantity=F("reserved_quantity") - quantity,
+        )
+
+        StockMovement.objects.create(
+            inventory_item=inventory_item,
+            movement_type=StockMovement.MovementType.OUT,
+            quantity=quantity,
+            reference=reference,
+            note=note,
         )
 
         inventory_item.refresh_from_db()
