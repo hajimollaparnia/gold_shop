@@ -17,5 +17,10 @@ urlpatterns = [
     path(
     "api/v1/coupons/",
     include("apps.coupons.urls"),
-),
+    ),
+    path(
+    "api/v1/wishlist/",
+    include("apps.wishlist.urls"),
+    ),
+
 ]
