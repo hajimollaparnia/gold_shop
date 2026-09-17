@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     "apps.coupons",
     "apps.wishlist",
     "apps.reviews",
+    "apps.notifications",
 
 ]
 
