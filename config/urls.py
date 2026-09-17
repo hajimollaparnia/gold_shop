@@ -22,5 +22,9 @@ urlpatterns = [
     "api/v1/wishlist/",
     include("apps.wishlist.urls"),
     ),
+    path(
+    "api/v1/reviews/",
+    include("apps.reviews.urls"),
+),
 
 ]
