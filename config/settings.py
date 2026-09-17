@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     "apps.pricing",
     "apps.inventory",
     "apps.orders",
-    'apps.payments'
+    "apps.payments",
+    "apps.cart",
 
 ]
 
