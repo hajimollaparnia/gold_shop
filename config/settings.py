@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 
 from dotenv import load_dotenv
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     "rest_framework",
+    "django_celery_beat",
 
     "apps.core",
     "apps.accounts",
@@ -66,6 +68,8 @@ INSTALLED_APPS = [
     "apps.wishlist",
     "apps.reviews",
     "apps.notifications",
+
+
 
 ]
 
@@ -202,3 +206,10 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_ENABLE_UTC = False
+
+CELERY_BEAT_SCHEDULE = {
+    "beat-test-task-every-minute": {
+        "task": "apps.core.tasks.beat_test_task",
+        "schedule": crontab(),
+    },
+}

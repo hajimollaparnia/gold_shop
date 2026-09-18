@@ -33,3 +33,6 @@ staticfiles/
 .mypy_cache/
 .coverage
 htmlcov/
+# Celery Beat runtime files
+celerybeat-schedule
+celerybeat-schedule.*
