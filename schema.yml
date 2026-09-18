@@ -1,0 +1,1618 @@
+openapi: 3.0.3
+info:
+  title: Gold Shop API
+  version: 1.0.0
+  description: Production-ready Gold Shop E-Commerce Backend API
+paths:
+  /api/inventory/items/:
+    get:
+      operationId: inventory_items_list
+      description: |-
+        Return a list of inventory items.
+
+        Inventory data is restricted to admin users because stock levels
+        are internal business information.
+      tags:
+      - inventory
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+          description: ''
+  /api/inventory/items/{id}/:
+    get:
+      operationId: inventory_items_retrieve
+      description: |-
+        Return details of a single inventory item.
+
+        Inventory data is restricted to admin users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - inventory
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+          description: ''
+  /api/inventory/reservations/commit/:
+    post:
+      operationId: inventory_reservations_commit_create
+      description: |-
+        Commit a previously reserved inventory quantity.
+
+        Committing decreases both physical stock and reserved stock.
+        Stock movement creation remains delegated to the appropriate
+        order/checkout integration layer.
+      summary: Commit reserved inventory
+      tags:
+      - Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Reserved inventory committed successfully.
+        '400':
+          description: Invalid commit operation.
+  /api/inventory/reservations/release/:
+    post:
+      operationId: inventory_reservations_release_create
+      description: |-
+        Release previously reserved inventory.
+
+        Reservation business rules are delegated to ReservationService.
+      summary: Release reserved inventory
+      tags:
+      - Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Reserved inventory released successfully.
+        '400':
+          description: Invalid release operation.
+  /api/inventory/reservations/reserve/:
+    post:
+      operationId: inventory_reservations_reserve_create
+      description: |-
+        Reserve available inventory stock.
+
+        Reservation business rules are delegated to ReservationService.
+      summary: Reserve inventory stock
+      tags:
+      - Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReservationOperation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Inventory stock reserved successfully.
+        '400':
+          description: Invalid reservation operation.
+  /api/inventory/stock/adjust/:
+    post:
+      operationId: inventory_stock_adjust_create
+      description: |-
+        Adjust inventory stock.
+
+        Positive values increase stock and negative values decrease stock.
+      summary: Adjust inventory stock
+      tags:
+      - Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Inventory stock adjusted successfully.
+        '400':
+          description: Invalid inventory operation.
+  /api/inventory/stock/decrease/:
+    post:
+      operationId: inventory_stock_decrease_create
+      description: |-
+        Decrease inventory stock.
+
+        Stock validation and business rules are delegated to StockService.
+      summary: Decrease inventory stock
+      tags:
+      - Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Inventory stock decreased successfully.
+        '400':
+          description: Invalid inventory operation.
+  /api/inventory/stock/increase/:
+    post:
+      operationId: inventory_stock_increase_create
+      description: |-
+        Increase inventory stock.
+
+        Stock validation and business rules are delegated to StockService.
+      summary: Increase inventory stock
+      tags:
+      - Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StockOperation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Inventory stock increased successfully.
+        '400':
+          description: Invalid inventory operation.
+  /api/orders/:
+    get:
+      operationId: orders_list
+      description: Return the authenticated user's orders.
+      summary: List authenticated user's orders
+      tags:
+      - Orders
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+          description: ''
+  /api/orders/{id}/:
+    get:
+      operationId: orders_retrieve
+      description: Return a single order belonging to the authenticated user.
+      summary: Retrieve an order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Orders
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Order not found.
+          description: ''
+  /api/orders/{id}/cancel/:
+    post:
+      operationId: orders_cancel_create
+      description: Cancel an authenticated user's order and release its reserved inventory.
+      summary: Cancel an order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Orders
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Order cannot be cancelled.
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Order not found.
+          description: ''
+  /api/orders/create/:
+    post:
+      operationId: orders_create_create
+      description: Create an order for an authenticated or guest customer. Inventory
+        is reserved atomically during order creation.
+      summary: Create a new order
+      tags:
+      - Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Invalid order data or insufficient inventory.
+          description: ''
+  /api/payments/{payment_id}/receipt/:
+    post:
+      operationId: payments_receipt_create
+      description: Upload a receipt image for an authenticated user's pending payment.
+      summary: Upload payment receipt
+      parameters:
+      - in: path
+        name: payment_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReceiptUpload'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReceiptUpload'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReceiptUpload'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+        '400':
+          description: Invalid receipt or payment state.
+        '404':
+          description: Payment not found.
+  /api/payments/orders/{order_id}/initialize/:
+    post:
+      operationId: payments_orders_initialize_create
+      description: Create a new card-to-card payment for an authenticated user's order.
+      summary: Initialize payment
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Payments
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+        '400':
+          description: The order cannot be paid.
+        '404':
+          description: Order not found.
+  /api/v1/cart/:
+    get:
+      operationId: v1_cart_retrieve
+      description: Return the authenticated user's shopping cart.
+      summary: Retrieve shopping cart
+      tags:
+      - Cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+  /api/v1/cart/clear/:
+    delete:
+      operationId: v1_cart_clear_destroy
+      description: Remove all items from the authenticated user's cart.
+      summary: Clear shopping cart
+      tags:
+      - Cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: Shopping cart cleared successfully.
+  /api/v1/cart/items/:
+    post:
+      operationId: v1_cart_items_create
+      description: Add a product or variant to the authenticated user's cart.
+      summary: Add item to cart
+      tags:
+      - Cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItem'
+          description: ''
+        '400':
+          description: Invalid cart quantity.
+        '404':
+          description: Product or product variant not found.
+  /api/v1/cart/items/{item_id}/:
+    patch:
+      operationId: v1_cart_items_partial_update
+      description: Update the quantity of an existing cart item.
+      summary: Update cart item
+      parameters:
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItem'
+          description: ''
+        '400':
+          description: Invalid cart quantity.
+        '404':
+          description: Cart item not found.
+  /api/v1/cart/items/{item_id}/delete/:
+    delete:
+      operationId: v1_cart_items_delete_destroy
+      description: Remove an item from the authenticated user's cart.
+      summary: Remove cart item
+      parameters:
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: Cart item removed successfully.
+        '404':
+          description: Cart item not found.
+  /api/v1/coupons/validate/:
+    post:
+      operationId: v1_coupons_validate_create
+      description: Validate a coupon against an order amount.
+      summary: Validate coupon and calculate discount
+      tags:
+      - Coupons
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponValidate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CouponValidate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CouponValidate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponValidationResponse'
+          description: ''
+        '400':
+          description: Invalid, expired, inactive, or unusable coupon.
+        '404':
+          description: Coupon not found.
+  /api/v1/notifications/:
+    get:
+      operationId: v1_notifications_list
+      description: Return notifications belonging to the authenticated user.
+      summary: List user notifications
+      tags:
+      - Notifications
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/{notification_id}/read/:
+    post:
+      operationId: v1_notifications_read_create
+      description: Mark a user's notification as read.
+      summary: Mark notification as read
+      parameters:
+      - in: path
+        name: notification_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Notifications
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+        '404':
+          description: Notification not found.
+  /api/v1/notifications/read-all/:
+    post:
+      operationId: v1_notifications_read_all_create
+      description: Mark all notifications belonging to the user as read.
+      summary: Mark all notifications as read
+      tags:
+      - Notifications
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: All notifications have been marked as read.
+  /api/v1/notifications/unread/:
+    get:
+      operationId: v1_notifications_unread_list
+      description: Return unread notifications for the authenticated user.
+      summary: List unread notifications
+      tags:
+      - Notifications
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/reviews/:
+    post:
+      operationId: v1_reviews_create
+      description: Create a product review for the authenticated user.
+      summary: Create product review
+      tags:
+      - Reviews
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateReview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateReview'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+        '400':
+          description: Review already exists for this product.
+        '404':
+          description: Product or product variant not found.
+  /api/v1/reviews/{review_id}/delete/:
+    delete:
+      operationId: v1_reviews_delete_destroy
+      description: Delete a review owned by the authenticated user.
+      summary: Delete product review
+      parameters:
+      - in: path
+        name: review_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Reviews
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: Review deleted successfully.
+        '404':
+          description: Review not found.
+  /api/v1/wishlist/:
+    get:
+      operationId: v1_wishlist_retrieve
+      description: Return the authenticated user's wishlist.
+      summary: Retrieve user's wishlist
+      tags:
+      - Wishlist
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wishlist'
+          description: ''
+  /api/v1/wishlist/clear/:
+    delete:
+      operationId: v1_wishlist_clear_destroy
+      description: Remove all items from the authenticated user's wishlist.
+      summary: Clear wishlist
+      tags:
+      - Wishlist
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: Wishlist cleared successfully.
+  /api/v1/wishlist/items/:
+    post:
+      operationId: v1_wishlist_items_create
+      description: Add a product or variant to the user's wishlist.
+      summary: Add item to wishlist
+      tags:
+      - Wishlist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddWishlistItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddWishlistItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddWishlistItem'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistItem'
+          description: ''
+        '400':
+          description: Wishlist item already exists.
+        '404':
+          description: Product or product variant not found.
+  /api/v1/wishlist/items/{item_id}/delete/:
+    delete:
+      operationId: v1_wishlist_items_delete_destroy
+      description: Remove an item from the authenticated user's wishlist.
+      summary: Remove item from wishlist
+      parameters:
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Wishlist
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: Wishlist item removed successfully.
+        '404':
+          description: Wishlist item not found.
+components:
+  schemas:
+    AddCartItem:
+      type: object
+      description: Validate data required to add an item to a cart.
+      properties:
+        product_id:
+          type: integer
+          minimum: 1
+        variant_id:
+          type: integer
+          minimum: 1
+          nullable: true
+        quantity:
+          type: integer
+          minimum: 1
+      required:
+      - product_id
+      - quantity
+    AddWishlistItem:
+      type: object
+      description: Validate data required to add an item to a wishlist.
+      properties:
+        product_id:
+          type: integer
+          minimum: 1
+        variant_id:
+          type: integer
+          minimum: 1
+          nullable: true
+      required:
+      - product_id
+    Cart:
+      type: object
+      description: Serialize the authenticated user's shopping cart.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - items
+      - updated_at
+    CartItem:
+      type: object
+      description: Serialize a cart item for API responses.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: integer
+        product_name:
+          type: string
+          readOnly: true
+        variant:
+          type: integer
+          nullable: true
+        variant_name:
+          type: string
+          readOnly: true
+          nullable: true
+        quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - product
+      - product_name
+      - quantity
+      - updated_at
+      - variant_name
+    CouponResponse:
+      type: object
+      description: Serialize coupon information returned by the API.
+      properties:
+        code:
+          type: string
+          readOnly: true
+        discount_type:
+          allOf:
+          - $ref: '#/components/schemas/DiscountTypeEnum'
+          readOnly: true
+        discount_value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+        minimum_order_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+        starts_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+      required:
+      - code
+      - discount_type
+      - discount_value
+      - expires_at
+      - is_active
+      - minimum_order_amount
+      - starts_at
+    CouponValidate:
+      type: object
+      description: Validate coupon validation requests.
+      properties:
+        code:
+          type: string
+          maxLength: 50
+        order_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+      required:
+      - code
+      - order_amount
+    CouponValidationResponse:
+      type: object
+      description: Serialize the result of coupon validation.
+      properties:
+        coupon:
+          $ref: '#/components/schemas/CouponResponse'
+        discount_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+        final_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+      required:
+      - coupon
+      - discount_amount
+      - final_amount
+    CreateOrder:
+      type: object
+      description: |-
+        Serializer for creating an order.
+
+        Orders can be created by guest customers. Customer information
+        is captured directly from the checkout request and is not required
+        to belong to an existing user account.
+      properties:
+        customer_name:
+          type: string
+          maxLength: 200
+        customer_phone:
+          type: string
+          maxLength: 11
+        shipping_address:
+          type: string
+        shipping_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          default: '0.00'
+        discount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          default: '0.00'
+        tax:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          default: '0.00'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateOrderItem'
+      required:
+      - customer_name
+      - customer_phone
+      - items
+      - shipping_address
+    CreateOrderItem:
+      type: object
+      description: |-
+        Serializer for validating a single order item.
+
+        The serializer only validates input data.
+        Business logic such as inventory reservation is handled
+        by OrderService.
+      properties:
+        product:
+          type: integer
+        variant:
+          type: integer
+          nullable: true
+        price_snapshot_id:
+          type: integer
+        quantity:
+          type: integer
+          minimum: 1
+      required:
+      - price_snapshot_id
+      - product
+      - quantity
+    CreateReview:
+      type: object
+      description: Validate data required to create a product review.
+      properties:
+        product_id:
+          type: integer
+          minimum: 1
+        variant_id:
+          type: integer
+          minimum: 1
+          nullable: true
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        title:
+          type: string
+          maxLength: 200
+        comment:
+          type: string
+      required:
+      - product_id
+      - rating
+    CurrencyEnum:
+      enum:
+      - IRR
+      type: string
+      description: '* `IRR` - ریال ایران'
+    DiscountTypeEnum:
+      enum:
+      - percentage
+      - fixed
+      type: string
+      description: |-
+        * `percentage` - Percentage
+        * `fixed` - Fixed
+    GatewayEnum:
+      enum:
+      - card_to_card
+      - zarinpal
+      type: string
+      description: |-
+        * `card_to_card` - کارت به کارت
+        * `zarinpal` - زرین پال
+    InventoryItem:
+      type: object
+      description: |-
+        Serialize inventory state for API consumers.
+
+        Available quantity is exposed as a read-only calculated field and
+        cannot be modified directly through the API.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: integer
+          nullable: true
+          title: محصول
+        variant:
+          type: integer
+          nullable: true
+          title: تنوع محصول
+        quantity:
+          type: integer
+          readOnly: true
+          title: موجودی
+        reserved_quantity:
+          type: integer
+          readOnly: true
+          title: موجودی رزرو شده
+        available_quantity:
+          type: integer
+          readOnly: true
+        is_active:
+          type: boolean
+          title: فعال
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاریخ ایجاد
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخرین بروزرسانی
+      required:
+      - available_quantity
+      - created_at
+      - id
+      - quantity
+      - reserved_quantity
+      - updated_at
+    Notification:
+      type: object
+      description: Serialize notifications for API responses.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        notification_type:
+          allOf:
+          - $ref: '#/components/schemas/NotificationTypeEnum'
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        data:
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - created_at
+      - data
+      - id
+      - is_read
+      - message
+      - notification_type
+      - read_at
+      - title
+    NotificationTypeEnum:
+      enum:
+      - order_created
+      - order_status_changed
+      - payment_success
+      - payment_failed
+      - coupon_expiring
+      - system
+      type: string
+      description: |-
+        * `order_created` - Order Created
+        * `order_status_changed` - Order Status Changed
+        * `payment_success` - Payment Success
+        * `payment_failed` - Payment Failed
+        * `coupon_expiring` - Coupon Expiring
+        * `system` - System
+    Order:
+      type: object
+      description: |-
+        Serializer for displaying complete order information.
+
+        The user field is read-only because account association is handled
+        by the application service after successful payment.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: کاربر
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+          title: وضعیت سفارش
+        payment_status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+          title: وضعیت پرداخت
+        customer_name:
+          type: string
+          readOnly: true
+          title: نام مشتری
+        customer_phone:
+          type: string
+          readOnly: true
+          title: شماره تماس
+        shipping_address:
+          type: string
+          readOnly: true
+          title: آدرس ارسال
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+          title: جمع جزء
+        discount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+          title: تخفیف
+        shipping_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+          title: هزینه ارسال
+        tax:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+          title: مالیات
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+          title: مبلغ نهایی
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/CurrencyEnum'
+          readOnly: true
+          title: واحد پول
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاریخ ایجاد
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخرین بروزرسانی
+      required:
+      - created_at
+      - currency
+      - customer_name
+      - customer_phone
+      - discount
+      - id
+      - items
+      - payment_status
+      - shipping_address
+      - shipping_cost
+      - status
+      - subtotal
+      - tax
+      - total_amount
+      - updated_at
+      - user
+    OrderItem:
+      type: object
+      description: Serializer for displaying order item information.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: integer
+          readOnly: true
+          title: محصول
+        variant:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: تنوع محصول
+        product_name_snapshot:
+          type: string
+          readOnly: true
+          title: نام محصول در زمان سفارش
+        sku_snapshot:
+          type: string
+          readOnly: true
+          title: SKU در زمان سفارش
+        weight_snapshot:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,4})?$
+          readOnly: true
+          title: وزن در زمان سفارش
+        purity_snapshot:
+          type: integer
+          readOnly: true
+          title: عیار در زمان سفارش
+        quantity:
+          type: integer
+          readOnly: true
+          title: تعداد
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+          title: قیمت واحد
+        total_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+          title: قیمت کل
+        price_snapshot:
+          type: integer
+          readOnly: true
+          title: اسنپ‌شات قیمت
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاریخ ایجاد
+      required:
+      - created_at
+      - id
+      - price_snapshot
+      - product
+      - product_name_snapshot
+      - purity_snapshot
+      - quantity
+      - sku_snapshot
+      - total_price
+      - unit_price
+      - variant
+      - weight_snapshot
+    OrderStatusEnum:
+      enum:
+      - pending
+      - confirmed
+      - processing
+      - shipped
+      - delivered
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - در انتظار
+        * `confirmed` - تایید شده
+        * `processing` - در حال پردازش
+        * `shipped` - ارسال شده
+        * `delivered` - تحویل شده
+        * `cancelled` - لغو شده
+    PatchedUpdateCartItem:
+      type: object
+      description: Validate data required to update cart item quantity.
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+    Payment:
+      type: object
+      description: Serialize payment information for API responses.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order:
+          type: integer
+          readOnly: true
+          title: سفارش
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+          readOnly: true
+          title: مبلغ پرداخت
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/CurrencyEnum'
+          readOnly: true
+          title: واحد پول
+        gateway:
+          allOf:
+          - $ref: '#/components/schemas/GatewayEnum'
+          readOnly: true
+          title: درگاه پرداخت
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+          title: وضعیت پرداخت
+        receipt_image:
+          type: string
+          format: uri
+          nullable: true
+          title: تصویر فیش واریزی
+        failure_reason:
+          type: string
+          readOnly: true
+          title: دلیل شکست پرداخت
+        verified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: تاریخ تایید پرداخت
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاریخ ایجاد
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخرین بروزرسانی
+      required:
+      - amount
+      - created_at
+      - currency
+      - failure_reason
+      - gateway
+      - id
+      - order
+      - status
+      - updated_at
+      - verified_at
+    PaymentStatusEnum:
+      enum:
+      - pending
+      - paid
+      - failed
+      - refunded
+      type: string
+      description: |-
+        * `pending` - در انتظار پرداخت
+        * `paid` - پرداخت شده
+        * `failed` - ناموفق
+        * `refunded` - بازپرداخت شده
+    ReceiptUpload:
+      type: object
+      description: Validate a customer-uploaded payment receipt.
+      properties:
+        receipt_image:
+          type: string
+          format: uri
+      required:
+      - receipt_image
+    ReservationOperation:
+      type: object
+      description: |-
+        Validate inventory reservation operation input.
+
+        Reservation business rules remain inside ReservationService.
+      properties:
+        inventory_item_id:
+          type: integer
+          minimum: 1
+        quantity:
+          type: integer
+          minimum: 1
+      required:
+      - inventory_item_id
+      - quantity
+    Review:
+      type: object
+      description: Serialize product reviews for API responses.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        user_phone:
+          type: string
+          readOnly: true
+        product:
+          type: integer
+        variant:
+          type: integer
+          nullable: true
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+        title:
+          type: string
+          maxLength: 200
+        comment:
+          type: string
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReviewStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - product
+      - rating
+      - status
+      - updated_at
+      - user
+      - user_phone
+    ReviewStatusEnum:
+      enum:
+      - pending
+      - approved
+      - rejected
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `approved` - Approved
+        * `rejected` - Rejected
+    StockOperation:
+      type: object
+      description: |-
+        Validate inventory stock operation input.
+
+        Business logic and stock mutation remain inside StockService.
+      properties:
+        inventory_item_id:
+          type: integer
+          minimum: 1
+        quantity:
+          type: integer
+        reference:
+          type: string
+          maxLength: 100
+        note:
+          type: string
+      required:
+      - inventory_item_id
+      - quantity
+    Wishlist:
+      type: object
+      description: Serialize the authenticated user's wishlist.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WishlistItem'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - items
+      - updated_at
+    WishlistItem:
+      type: object
+      description: Serialize a wishlist item for API responses.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: integer
+        product_name:
+          type: string
+          readOnly: true
+        variant:
+          type: integer
+          nullable: true
+        variant_name:
+          type: string
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - product
+      - product_name
+      - variant_name
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

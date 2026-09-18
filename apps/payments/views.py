@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
 
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -18,6 +20,24 @@ class PaymentInitializeAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Payments"],
+        summary="Initialize payment",
+        description=(
+            "Create a new card-to-card payment for an authenticated "
+            "user's order."
+        ),
+        request=None,
+        responses={
+            201: PaymentSerializer,
+            400: OpenApiResponse(
+                description="The order cannot be paid.",
+            ),
+            404: OpenApiResponse(
+                description="Order not found.",
+            ),
+        },
+    )
     def post(self, request, order_id: int):
         """Create a payment for the requested order."""
 
@@ -46,6 +66,24 @@ class PaymentReceiptUploadAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Payments"],
+        summary="Upload payment receipt",
+        description=(
+            "Upload a receipt image for an authenticated user's "
+            "pending payment."
+        ),
+        request=ReceiptUploadSerializer,
+        responses={
+            200: PaymentSerializer,
+            400: OpenApiResponse(
+                description="Invalid receipt or payment state.",
+            ),
+            404: OpenApiResponse(
+                description="Payment not found.",
+            ),
+        },
+    )
     def post(self, request, payment_id: int):
         """Upload the receipt associated with a payment."""
 

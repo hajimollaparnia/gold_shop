@@ -1,3 +1,5 @@
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -24,6 +26,20 @@ class CouponValidateAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Coupons"],
+        summary="Validate coupon and calculate discount",
+        request=CouponValidateSerializer,
+        responses={
+            200: CouponValidationResponseSerializer,
+            400: OpenApiResponse(
+                description="Invalid, expired, inactive, or unusable coupon.",
+            ),
+            404: OpenApiResponse(
+                description="Coupon not found.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = CouponValidateSerializer(
             data=request.data,

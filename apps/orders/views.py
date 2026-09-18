@@ -1,7 +1,9 @@
 from django.http import Http404
 
+from drf_spectacular.utils import extend_schema
+
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .exceptions import InvalidOrderItemError
@@ -22,6 +24,14 @@ class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Orders"],
+        summary="List authenticated user's orders",
+        responses=OrderSerializer(many=True),
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         return OrderSelector.get_user_orders(
             self.request.user,
@@ -30,14 +40,32 @@ class OrderListView(generics.ListAPIView):
 
 class OrderCreateView(generics.CreateAPIView):
     """
-    Create a new order for the authenticated user.
+    Create a new order for an authenticated or guest customer.
 
-    The serializer validates the request data and the service
+    The serializer validates the request data and OrderService
     handles the actual order business logic.
     """
 
     serializer_class = CreateOrderSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        tags=["Orders"],
+        summary="Create a new order",
+        description=(
+            "Create an order for an authenticated or guest customer. "
+            "Inventory is reserved atomically during order creation."
+        ),
+        request=CreateOrderSerializer,
+        responses={
+            201: OrderSerializer,
+            400: {
+                "description": "Invalid order data or insufficient inventory."
+            },
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         """
@@ -52,9 +80,15 @@ class OrderCreateView(generics.CreateAPIView):
 
         validated_data = serializer.validated_data
 
+        user = (
+            request.user
+            if request.user.is_authenticated
+            else None
+        )
+
         try:
             order = OrderService.create_order(
-                user=request.user,
+                user=user,
                 customer_name=validated_data["customer_name"],
                 customer_phone=validated_data["customer_phone"],
                 shipping_address=validated_data["shipping_address"],
@@ -109,6 +143,19 @@ class OrderDetailView(generics.RetrieveAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Orders"],
+        summary="Retrieve an order",
+        responses={
+            200: OrderSerializer,
+            404: {
+                "description": "Order not found."
+            },
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_object(self):
         try:
             return OrderSelector.get_order_for_user(
@@ -117,6 +164,7 @@ class OrderDetailView(generics.RetrieveAPIView):
             )
         except Order.DoesNotExist:
             raise Http404("Order not found.")
+
 
 class OrderCancelView(generics.GenericAPIView):
     """
@@ -128,6 +176,24 @@ class OrderCancelView(generics.GenericAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Orders"],
+        summary="Cancel an order",
+        description=(
+            "Cancel an authenticated user's order and release "
+            "its reserved inventory."
+        ),
+        request=None,
+        responses={
+            200: OrderSerializer,
+            400: {
+                "description": "Order cannot be cancelled."
+            },
+            404: {
+                "description": "Order not found."
+            },
+        },
+    )
     def post(self, request, *args, **kwargs):
         """
         Cancel the requested order and release its inventory reservation.

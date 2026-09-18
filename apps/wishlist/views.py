@@ -1,3 +1,5 @@
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -22,6 +24,13 @@ class WishlistDetailAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Wishlist"],
+        summary="Retrieve user's wishlist",
+        responses={
+            200: WishlistSerializer,
+        },
+    )
     def get(self, request):
         wishlist = WishlistService.get_wishlist(request.user)
 
@@ -41,6 +50,20 @@ class WishlistItemCreateAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Wishlist"],
+        summary="Add item to wishlist",
+        request=AddWishlistItemSerializer,
+        responses={
+            201: WishlistItemSerializer,
+            400: OpenApiResponse(
+                description="Wishlist item already exists.",
+            ),
+            404: OpenApiResponse(
+                description="Product or product variant not found.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = AddWishlistItemSerializer(
             data=request.data,
@@ -80,6 +103,19 @@ class WishlistItemDeleteAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Wishlist"],
+        summary="Remove item from wishlist",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Wishlist item removed successfully.",
+            ),
+            404: OpenApiResponse(
+                description="Wishlist item not found.",
+            ),
+        },
+    )
     def delete(self, request, item_id):
         try:
             WishlistService.remove_item(
@@ -103,6 +139,16 @@ class WishlistClearAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Wishlist"],
+        summary="Clear wishlist",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Wishlist cleared successfully.",
+            ),
+        },
+    )
     def delete(self, request):
         WishlistService.clear_wishlist(request.user)
 

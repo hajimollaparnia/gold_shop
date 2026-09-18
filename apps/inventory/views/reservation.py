@@ -1,3 +1,5 @@
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
@@ -18,6 +20,19 @@ class ReservationReserveView(APIView):
 
     permission_classes = (IsAdminUser,)
 
+    @extend_schema(
+        tags=["Inventory"],
+        summary="Reserve inventory stock",
+        request=ReservationOperationSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Inventory stock reserved successfully.",
+            ),
+            400: OpenApiResponse(
+                description="Invalid reservation operation.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = ReservationOperationSerializer(
             data=request.data,
@@ -57,6 +72,19 @@ class ReservationReleaseView(APIView):
 
     permission_classes = (IsAdminUser,)
 
+    @extend_schema(
+        tags=["Inventory"],
+        summary="Release reserved inventory",
+        request=ReservationOperationSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Reserved inventory released successfully.",
+            ),
+            400: OpenApiResponse(
+                description="Invalid release operation.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = ReservationOperationSerializer(
             data=request.data,
@@ -98,6 +126,19 @@ class ReservationCommitView(APIView):
 
     permission_classes = (IsAdminUser,)
 
+    @extend_schema(
+        tags=["Inventory"],
+        summary="Commit reserved inventory",
+        request=ReservationOperationSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Reserved inventory committed successfully.",
+            ),
+            400: OpenApiResponse(
+                description="Invalid commit operation.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = ReservationOperationSerializer(
             data=request.data,

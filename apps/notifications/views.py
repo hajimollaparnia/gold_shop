@@ -1,3 +1,5 @@
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -14,6 +16,13 @@ class NotificationListAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Notifications"],
+        summary="List user notifications",
+        responses={
+            200: NotificationSerializer(many=True),
+        },
+    )
     def get(self, request):
         notifications = NotificationSelector.get_user_notifications(
             request.user,
@@ -33,6 +42,17 @@ class NotificationMarkAsReadAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Notifications"],
+        summary="Mark notification as read",
+        request=None,
+        responses={
+            200: NotificationSerializer,
+            404: OpenApiResponse(
+                description="Notification not found.",
+            ),
+        },
+    )
     def post(self, request, notification_id):
         try:
             notification = NotificationService.mark_as_read(
@@ -57,6 +77,16 @@ class NotificationMarkAllAsReadAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Notifications"],
+        summary="Mark all notifications as read",
+        request=None,
+        responses={
+            200: OpenApiResponse(
+                description="All notifications have been marked as read.",
+            ),
+        },
+    )
     def post(self, request):
         NotificationService.mark_all_as_read(request.user)
 
@@ -71,6 +101,13 @@ class UnreadNotificationListAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Notifications"],
+        summary="List unread notifications",
+        responses={
+            200: NotificationSerializer(many=True),
+        },
+    )
     def get(self, request):
         notifications = NotificationSelector.get_unread_notifications(
             request.user,

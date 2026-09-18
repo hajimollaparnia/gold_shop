@@ -1,3 +1,5 @@
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
@@ -16,6 +18,19 @@ class StockIncreaseView(APIView):
 
     permission_classes = (IsAdminUser,)
 
+    @extend_schema(
+        tags=["Inventory"],
+        summary="Increase inventory stock",
+        request=StockOperationSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Inventory stock increased successfully.",
+            ),
+            400: OpenApiResponse(
+                description="Invalid inventory operation.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = StockOperationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -55,6 +70,19 @@ class StockDecreaseView(APIView):
 
     permission_classes = (IsAdminUser,)
 
+    @extend_schema(
+        tags=["Inventory"],
+        summary="Decrease inventory stock",
+        request=StockOperationSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Inventory stock decreased successfully.",
+            ),
+            400: OpenApiResponse(
+                description="Invalid inventory operation.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = StockOperationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -94,6 +122,19 @@ class StockAdjustView(APIView):
 
     permission_classes = (IsAdminUser,)
 
+    @extend_schema(
+        tags=["Inventory"],
+        summary="Adjust inventory stock",
+        request=StockOperationSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Inventory stock adjusted successfully.",
+            ),
+            400: OpenApiResponse(
+                description="Invalid inventory operation.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = StockOperationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

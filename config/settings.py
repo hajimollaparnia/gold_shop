@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     "rest_framework",
+    "drf_spectacular",
     "django_celery_beat",
 
     "apps.core",
@@ -68,8 +69,6 @@ INSTALLED_APPS = [
     "apps.wishlist",
     "apps.reviews",
     "apps.notifications",
-
-
 
 ]
 
@@ -184,6 +183,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 AUTH_USER_MODEL = "accounts.User"
 
@@ -212,4 +212,12 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.core.tasks.beat_test_task",
         "schedule": crontab(),
     },
+}
+
+# OpenAPI / Swagger
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Gold Shop API",
+    "DESCRIPTION": "Production-ready Gold Shop E-Commerce Backend API",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }

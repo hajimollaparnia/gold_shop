@@ -1,3 +1,5 @@
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -24,6 +26,13 @@ class CartDetailAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Cart"],
+        summary="Retrieve shopping cart",
+        responses={
+            200: CartSerializer,
+        },
+    )
     def get(self, request):
         cart = CartSelector.get_cart_for_user(request.user)
 
@@ -41,6 +50,20 @@ class CartItemCreateAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Cart"],
+        summary="Add item to cart",
+        request=AddCartItemSerializer,
+        responses={
+            201: CartItemSerializer,
+            400: OpenApiResponse(
+                description="Invalid cart quantity.",
+            ),
+            404: OpenApiResponse(
+                description="Product or product variant not found.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = AddCartItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -79,6 +102,20 @@ class CartItemUpdateAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Cart"],
+        summary="Update cart item",
+        request=UpdateCartItemSerializer,
+        responses={
+            200: CartItemSerializer,
+            400: OpenApiResponse(
+                description="Invalid cart quantity.",
+            ),
+            404: OpenApiResponse(
+                description="Cart item not found.",
+            ),
+        },
+    )
     def patch(self, request, item_id):
         serializer = UpdateCartItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -111,6 +148,19 @@ class CartItemDeleteAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Cart"],
+        summary="Remove cart item",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Cart item removed successfully.",
+            ),
+            404: OpenApiResponse(
+                description="Cart item not found.",
+            ),
+        },
+    )
     def delete(self, request, item_id):
         try:
             CartService.remove_item(
@@ -131,6 +181,16 @@ class CartClearAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Cart"],
+        summary="Clear shopping cart",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Shopping cart cleared successfully.",
+            ),
+        },
+    )
     def delete(self, request):
         CartService.clear_cart(request.user)
 

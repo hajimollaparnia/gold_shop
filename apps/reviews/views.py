@@ -1,3 +1,5 @@
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -18,6 +20,20 @@ class ReviewCreateAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Reviews"],
+        summary="Create product review",
+        request=CreateReviewSerializer,
+        responses={
+            201: ReviewSerializer,
+            400: OpenApiResponse(
+                description="Review already exists for this product.",
+            ),
+            404: OpenApiResponse(
+                description="Product or product variant not found.",
+            ),
+        },
+    )
     def post(self, request):
         serializer = CreateReviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -58,6 +74,19 @@ class ReviewDeleteAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Reviews"],
+        summary="Delete product review",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Review deleted successfully.",
+            ),
+            404: OpenApiResponse(
+                description="Review not found.",
+            ),
+        },
+    )
     def delete(self, request, review_id):
         try:
             ReviewService.delete_review(

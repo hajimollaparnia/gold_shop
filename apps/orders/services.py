@@ -60,7 +60,7 @@ class OrderService:
     @transaction.atomic
     def create_order(
         *,
-        user,
+        user=None,
         customer_name,
         customer_phone,
         shipping_address,
@@ -71,6 +71,11 @@ class OrderService:
     ):
         """
         Create an order and reserve its inventory atomically.
+
+        Orders may be created by either authenticated users or guest
+        customers. Guest orders are initially created without a user
+        account and can be associated with a user after successful
+        payment.
 
         If any item fails during creation or reservation, the complete
         transaction is rolled back.

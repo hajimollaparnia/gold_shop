@@ -137,12 +137,14 @@ def test_create_order_api(
 
 
 @pytest.mark.django_db
-def test_create_order_api_requires_authentication(
+def test_create_order_api_allows_guest_customer(
     api_client,
     order_api_data,
 ):
     """
-    Ensure unauthenticated users cannot create orders.
+    Ensure unauthenticated guest customers can create orders.
+
+    Guest orders are initially created without a user account.
     """
 
     data = order_api_data
@@ -150,9 +152,12 @@ def test_create_order_api_requires_authentication(
     response = api_client.post(
         "/api/orders/create/",
         {
-            "customer_name": "Test User",
-            "customer_phone": "09123456789",
-            "shipping_address": "Test Address",
+            "customer_name": "Guest User",
+            "customer_phone": "09111222333",
+            "shipping_address": "Guest Address",
+            "shipping_cost": "500000",
+            "discount": "100000",
+            "tax": "1000000",
             "items": [
                 {
                     "product": data["product"].pk,
@@ -165,7 +170,25 @@ def test_create_order_api_requires_authentication(
         format="json",
     )
 
-    assert response.status_code in (401, 403)
+    assert response.status_code == 201
+
+    assert response.data["status"] == OrderStatus.PENDING
+    assert response.data["customer_name"] == "Guest User"
+
+    order = Order.objects.get(
+        pk=response.data["id"],
+    )
+
+    assert order.user is None
+    assert order.customer_phone == "09111222333"
+
+    inventory = InventoryItem.objects.get(
+        pk=data["inventory"].pk,
+    )
+
+    assert inventory.quantity == 10
+    assert inventory.reserved_quantity == 2
+    assert inventory.available_quantity == 8
 
 
 @pytest.mark.django_db
@@ -362,6 +385,8 @@ def test_cancel_order_api_cannot_cancel_delivered_order(
         format="json",
     )
 
+    assert create_response.status_code == 201
+
     order_id = create_response.data["id"]
 
     order = Order.objects.get(
@@ -416,6 +441,8 @@ def test_cancel_order_api_cannot_cancel_another_users_order(
         },
         format="json",
     )
+
+    assert create_response.status_code == 201
 
     order_id = create_response.data["id"]
 

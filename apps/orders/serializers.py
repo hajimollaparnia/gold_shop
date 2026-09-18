@@ -56,9 +56,11 @@ class CreateOrderItemSerializer(serializers.Serializer):
 
 class CreateOrderSerializer(serializers.Serializer):
     """
-    Serializer for creating a new order.
+    Serializer for creating an order.
 
-    Customer identity is taken from the authenticated user.
+    Orders can be created by guest customers. Customer information
+    is captured directly from the checkout request and is not required
+    to belong to an existing user account.
     """
 
     customer_name = serializers.CharField(
@@ -126,6 +128,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     """
     Serializer for displaying complete order information.
+
+    The user field is read-only because account association is handled
+    by the application service after successful payment.
     """
 
     items = OrderItemSerializer(

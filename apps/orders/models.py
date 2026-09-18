@@ -38,15 +38,21 @@ class Order(models.Model):
     """
     Represents a customer order.
 
-    The order stores a historical financial snapshot so that changes
-    in product prices, user information, or market prices do not
-    modify an existing order.
+    Orders may initially belong to a guest customer. The user relation
+    is assigned after successful payment when the customer account is
+    created or an existing account is identified.
+
+    Customer and financial information is snapshotted so that changes
+    to user data, catalog data, or market prices do not modify an
+    existing order.
     """
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="orders",
+        null=True,
+        blank=True,
         verbose_name="کاربر",
     )
 
