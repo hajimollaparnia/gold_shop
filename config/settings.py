@@ -108,6 +108,17 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# Redis
+# Shared in-memory data store used for caching, temporary data,
+# rate limiting, distributed locks, and Celery.
+REDIS_URL = os.getenv(
+    "REDIS_URL",
+    "redis://127.0.0.1:6379/1",
+)
+
+REDIS_OPTIONS = {
+    "protocol": 2,
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
@@ -171,3 +182,23 @@ REST_FRAMEWORK = {
     ],
 }
 AUTH_USER_MODEL = "accounts.User"
+
+# Celery
+# Redis acts as both the message broker and result backend.
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+
+# Force Redis protocol 2 for Celery/Kombu compatibility.
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    "protocol": 2,
+}
+
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
+    "protocol": 2,
+}
+
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = False
