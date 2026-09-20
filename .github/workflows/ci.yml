@@ -53,6 +53,9 @@ jobs:
 
       - name: Run Django checks
         env:
+          DJANGO_SECRET_KEY: ci-test-secret-key
+          DJANGO_DEBUG: "False"
+          DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
           POSTGRES_DB: gold_shop
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -63,6 +66,9 @@ jobs:
 
       - name: Run tests
         env:
+          DJANGO_SECRET_KEY: ci-test-secret-key
+          DJANGO_DEBUG: "False"
+          DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
           POSTGRES_DB: gold_shop
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
