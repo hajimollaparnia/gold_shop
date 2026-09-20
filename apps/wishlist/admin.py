@@ -5,7 +5,7 @@ from .models import Wishlist, WishlistItem
 
 @admin.register(Wishlist)
 class WishlistAdmin(admin.ModelAdmin):
-    """Admin configuration for user wishlists."""
+    """Administrative interface for user wishlists."""
 
     list_display = (
         "id",
@@ -23,10 +23,20 @@ class WishlistAdmin(admin.ModelAdmin):
         "updated_at",
     )
 
+    list_select_related = (
+        "user",
+    )
+
+    ordering = (
+        "-created_at",
+    )
+
+    list_per_page = 50
+
 
 @admin.register(WishlistItem)
 class WishlistItemAdmin(admin.ModelAdmin):
-    """Admin configuration for wishlist items."""
+    """Administrative interface for wishlist items."""
 
     list_display = (
         "id",
@@ -49,3 +59,15 @@ class WishlistItemAdmin(admin.ModelAdmin):
     readonly_fields = (
         "created_at",
     )
+
+    list_select_related = (
+        "wishlist",
+        "product",
+        "variant",
+    )
+
+    ordering = (
+        "-created_at",
+    )
+
+    list_per_page = 50

@@ -5,14 +5,16 @@ from .models import Order, OrderItem
 
 class OrderItemInline(admin.TabularInline):
     """
-    Display order items directly inside the order administration page.
+    Display immutable order items inside the order administration page.
+
+    Order item data represents historical snapshots captured at checkout
+    and must not be modified manually through the admin interface.
     """
 
     model = OrderItem
     extra = 0
+    can_delete = False
 
-    # Order item data is historical and should not be modified casually
-    # after the order has been created.
     readonly_fields = (
         "product_name_snapshot",
         "sku_snapshot",
@@ -29,6 +31,9 @@ class OrderItemInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     """
     Administrative interface for customer orders.
+
+    Provides operational visibility into order status, payment status,
+    financial totals, customer information, and historical order items.
     """
 
     list_display = (
@@ -61,8 +66,16 @@ class OrderAdmin(admin.ModelAdmin):
         "updated_at",
     )
 
-    ordering = ("-created_at",)
+    ordering = (
+        "-created_at",
+    )
 
-    inlines = [
+    list_select_related = (
+        "user",
+    )
+
+    inlines = (
         OrderItemInline,
-    ]
+    )
+
+    list_per_page = 50

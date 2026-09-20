@@ -5,7 +5,7 @@ from .models import Payment, PaymentLog, Refund
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    """Admin configuration for payment management."""
+    """Administrative interface for payment records."""
 
     list_display = (
         "id",
@@ -37,10 +37,16 @@ class PaymentAdmin(admin.ModelAdmin):
 
     ordering = ("-created_at",)
 
+    list_select_related = (
+        "order",
+    )
+
+    list_per_page = 50
+
 
 @admin.register(PaymentLog)
 class PaymentLogAdmin(admin.ModelAdmin):
-    """Admin configuration for immutable payment audit logs."""
+    """Administrative interface for immutable payment audit logs."""
 
     list_display = (
         "id",
@@ -67,10 +73,24 @@ class PaymentLogAdmin(admin.ModelAdmin):
         "created_at",
     )
 
+    list_select_related = (
+        "payment",
+    )
+
+    list_per_page = 50
+
+    def has_add_permission(self, request):
+        """Prevent manual creation of audit logs."""
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        """Prevent deletion of audit logs."""
+        return False
+
 
 @admin.register(Refund)
 class RefundAdmin(admin.ModelAdmin):
-    """Admin configuration for refund records."""
+    """Administrative interface for refund records."""
 
     list_display = (
         "id",
@@ -95,3 +115,11 @@ class RefundAdmin(admin.ModelAdmin):
         "updated_at",
         "processed_at",
     )
+
+    list_select_related = (
+        "payment",
+    )
+
+    ordering = ("-created_at",)
+
+    list_per_page = 50

@@ -5,7 +5,7 @@ from .models import Coupon, CouponUsage
 
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
-    """Admin configuration for managing coupons."""
+    """Administrative interface for coupon management."""
 
     list_display = (
         "code",
@@ -33,10 +33,16 @@ class CouponAdmin(admin.ModelAdmin):
         "updated_at",
     )
 
+    ordering = (
+        "-created_at",
+    )
+
+    list_per_page = 50
+
 
 @admin.register(CouponUsage)
 class CouponUsageAdmin(admin.ModelAdmin):
-    """Admin configuration for coupon usage history."""
+    """Administrative interface for immutable coupon usage history."""
 
     list_display = (
         "coupon",
@@ -62,3 +68,23 @@ class CouponUsageAdmin(admin.ModelAdmin):
         "discount_amount",
         "used_at",
     )
+
+    list_select_related = (
+        "coupon",
+        "user",
+        "order",
+    )
+
+    ordering = (
+        "-used_at",
+    )
+
+    list_per_page = 50
+
+    def has_add_permission(self, request):
+        """Prevent manual creation of coupon usage records."""
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        """Prevent deletion of coupon usage history."""
+        return False
