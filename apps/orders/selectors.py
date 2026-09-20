@@ -17,7 +17,13 @@ class OrderSelector:
         return (
             Order.objects
             .filter(user=user)
-            .prefetch_related("items")
+
+            .prefetch_related(
+                "items",
+                "items__product",
+                "items__variant",
+                "items__price_snapshot",
+            )
             .order_by("-created_at")
         )
 

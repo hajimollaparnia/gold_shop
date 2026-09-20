@@ -48,8 +48,7 @@ class PaymentService:
 
         locked_order = (
             Order.objects.select_for_update()
-            .select_related("user")
-            .get(pk=order.pk)
+                .get(pk=order.pk)
         )
 
         if locked_order.status in {
