@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import OpenApiResponse, extend_schema
@@ -48,7 +49,7 @@ class PaymentInitializeAPIView(APIView):
         )
 
         gateway = CardToCardGateway(
-            merchant_card_number="",
+            merchant_card_number=settings.MERCHANT_CARD_NUMBER,
         )
 
         payment = PaymentService(
@@ -99,7 +100,7 @@ class PaymentReceiptUploadAPIView(APIView):
         )
 
         gateway = CardToCardGateway(
-            merchant_card_number="",
+            merchant_card_number=settings.MERCHANT_CARD_NUMBER,
         )
 
         payment = PaymentService(

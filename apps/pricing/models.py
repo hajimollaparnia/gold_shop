@@ -180,6 +180,11 @@ class MarketPrice(models.Model):
                 condition=models.Q(sell_price__gte=0),
                 name="market_sell_price_non_negative",
             ),
+            models.UniqueConstraint(
+                fields=["asset", "purity"],
+                condition=models.Q(is_active=True),
+                name="unique_active_market_price_asset_purity",
+            ),
         ]
 
     def __str__(self):

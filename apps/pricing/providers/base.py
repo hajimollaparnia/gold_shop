@@ -1,3 +1,4 @@
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
@@ -14,6 +15,7 @@ class MarketPriceData:
     """
 
     asset: str
+    purity: int | None
     buy_price: Decimal
     sell_price: Decimal
     currency: str
@@ -25,6 +27,9 @@ class MarketPriceData:
 
         if not self.asset.strip():
             raise ValueError("asset must not be empty.")
+
+        if self.purity is not None and self.purity <= 0:
+            raise ValueError("purity must be greater than zero.")
 
         if not self.currency.strip():
             raise ValueError("currency must not be empty.")
@@ -62,3 +67,4 @@ class PriceProvider(ABC):
             A list of normalized market price records.
         """
         raise NotImplementedError
+

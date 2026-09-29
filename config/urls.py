@@ -42,6 +42,10 @@ path(
     "api/v1/notifications/",
     include("apps.notifications.urls"),
 ),
+path(
+    "api/v1/pricing/",
+    include("apps.pricing.urls"),
+),
 
 
 ]

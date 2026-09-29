@@ -311,9 +311,9 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_ENABLE_UTC = False
 
 CELERY_BEAT_SCHEDULE = {
-    "beat-test-task-every-minute": {
-        "task": "apps.core.tasks.beat_test_task",
-        "schedule": crontab(),
+    "sync-market-prices-every-10-minutes": {
+        "task": "apps.pricing.tasks.sync_market_prices",
+        "schedule": crontab(minute="*/10"),
     },
 }
 
@@ -324,3 +324,16 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+# ---------------------------------------------------------------------------
+# Payments
+# ---------------------------------------------------------------------------
+
+MERCHANT_CARD_NUMBER = os.getenv("MERCHANT_CARD_NUMBER", "")
+
+if not DEBUG and not MERCHANT_CARD_NUMBER:
+    raise RuntimeError(
+        "MERCHANT_CARD_NUMBER environment variable is not set."
+    )
+
+SERVIX_API_KEY = os.getenv("SERVIX_API_KEY", "")
